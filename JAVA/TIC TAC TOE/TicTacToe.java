@@ -21,7 +21,7 @@ public class TicTacToe {
             
             String input = scanner.next();
 
-            // --- UNDO CHECK ---
+            //UNDO CHECK
             if (input.equalsIgnoreCase("undo")) {
                 if (undoLastMove(gameboard, moveHistory)) {
                     currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
@@ -29,7 +29,7 @@ public class TicTacToe {
                 continue;
             }
 
-            // --- ROBUST INPUT HANDLING (The Interview Flex) ---
+            //INPUT HANDLING 
             int row, col;
             try {
                 // 1. Try to parse the first word as an integer
@@ -73,7 +73,7 @@ public class TicTacToe {
         scanner.close();
     }
 
-    // --- HELPER METHODS REMAIN THE SAME ---
+    //HELPER METHODS REMAIN THE SAME
     
     public static boolean undoLastMove(char[][] board, Stack<int[]> history) {
         if (history.isEmpty()) {
