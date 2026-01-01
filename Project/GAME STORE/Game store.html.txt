@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sign Up Page</title>
+    <!-- Using Roboto font to match the style -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- NEW: Firebase SDK Imports -->
+    <script type="module">
+        // These global variables are provided by the environment
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Initialize Firebase
+        if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
+            try {
+                // FIX: Import setLogLevel from firebase-app, not firebase-auth
+                const { initializeApp, setLogLevel } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+                const { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+                const { getFirestore, doc, setDoc, getDoc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+                
+                // FIX: setLogLevel is called directly and takes a string
+                setLogLevel('debug'); // Enable detailed logs
+
+                // App logic will be handled in the main script tag
+                window.firebaseServices = { auth, db, appId, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, signInWithCustomToken, signInAnonymously };
+                
+                // Handle initial authentication
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("User is authenticated:", user.uid);
+                        window.currentUserId = user.uid;
+                    } else {
+                        console.log("User is not authenticated. Attempting sign-in.");
+                        window.currentUserId = null;
+                        // Sign in with custom token if available, else anonymously
+                        (async () => {
+                            try {
+                                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                    await signInWithCustomToken(auth, __initial_auth_token);
+                                    console.log("Signed in with custom token.");
+                                } else {
+                                    await signInAnonymously(auth);
+                                    console.log("Signed in anonymously.");
+                                }
+                                window.currentUserId = auth.currentUser?.uid || crypto.randomUUID();
+                            } catch (error) {
+                                console.error("Error during initial sign-in:", error);
+                                // Fallback user ID if all auth fails
+                                window.currentUserId = crypto.randomUUID();
+                            }
+                        })();
+                    }
+                });
+
+            } catch (e) {
+                console.error("Error initializing Firebase:", e);
+            }
+        } else {
+            console.warn("Firebase config is missing. App will run without persistence.");
+        }
+    </script>
+    
+    <style>
+        /* --- Original Component Code --- */
+        .input__container {
+          position: relative;
+          background: #f0f0f0;
+          padding: 20px;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          gap: 15px;
+          border: 4px solid #000;
+          max-width: 350px;
+          transition: all 400ms cubic-bezier(0.23, 1, 0.32, 1);
+          transform-style: preserve-3d;
+          transform: rotateX(10deg) rotateY(-10deg);
+          perspective: 1000px;
+          box-shadow: 10px 10px 0 #000;
+        }
+
+        .input__container:hover {
+          transform: rotateX(5deg) rotateY(1 deg) scale(1.05);
+          box-shadow: 25px 25px 0 -5px #e9b50b, 25px 25px 0 0 #000;
+        }
+
+        .shadow__input {
+          content: "";
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          left: 0;
+          bottom: 0;
+          z-index: -1;
+          transform: translateZ(-50px);
+          background: linear-gradient(
+            45deg,
+            rgba(255, 107, 107, 0.4) 0%,
+            rgba(255, 107, 107, 0.1) 100%
+          );
+          filter: blur(20px);
+        }
+
+        .input__button__shadow {
+          cursor: pointer;
+          border: 3px solid #000;
+          background: #e9b50b;
+          transition: all 400ms cubic-bezier(0.23, 1, 0.32, 1);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 10px;
+          transform: translateZ(20px);
+          position: relative;
+          z-index: 3;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+
+        .input__button__shadow:hover {
+          background: #e9b50b;
+          transform: translateZ(10px) translateX(-5px) translateY(-5px);
+          box-shadow: 5px 5px 0 0 #000;
+        }
+
+        .input__button__shadow svg {
+          fill: #000;
+          width: 25px;
+          height: 25px;
+        }
+
+        .input__search {
+          width: 100%;
+          outline: none;
+          border: 3px solid #000;
+          padding: 15px;
+          font-size: 18px;
+          background: #fff;
+          color: #000;
+          transform: translateZ(10px);
+          transition: all 400ms cubic-bezier(0.23, 1, 0.32, 1);
+          position: relative;
+          z-index: 3;
+          font-family: "Roboto", Arial, sans-serif;
+          letter-spacing: -0.5px;
+        }
+
+        .input__search::placeholder {
+          color: #666;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+
+        .input__search:hover,
+        .input__search:focus {
+          background: #f0f0f0;
+          transform: translateZ(20px) translateX(-5px) translateY(-5px);
+          box-shadow: 5px 5px 0 0 #000;
+        }
+        
+        /* --- REMOVED .input__container::before --- */
+        /* Specific labels for each form */
+        #signup-screen .input__container:nth-of-type(1)::before {
+            content: "USERNAME";
+            position: absolute; top: -15px; left: 20px; background: #e9b50b; color: #000; font-weight: bold; padding: 5px 10px; font-size: 14px; transform: translateZ(50px); z-index: 4; border: 2px solid #000;
+        }
+        #signup-screen .input__container:nth-of-type(2)::before {
+            content: "EMAIL";
+            position: absolute; top: -15px; left: 20px; background: #e9b50b; color: #000; font-weight: bold; padding: 5px 10px; font-size: 14px; transform: translateZ(50px); z-index: 4; border: 2px solid #000;
+        }
+        #signup-screen .input__container:nth-of-type(3)::before {
+            content: "PASSWORD";
+            position: absolute; top: -15px; left: 20px; background: #e9b50b; color: #000; font-weight: bold; padding: 5px 10px; font-size: 14px; transform: translateZ(50px); z-index: 4; border: 2px solid #000;
+        }
+        #signup-screen .input__container:nth-of-type(4)::before {
+            content: "CONFIRM";
+            position: absolute; top: -15px; left: 20px; background: #e9b50b; color: #000; font-weight: bold; padding: 5px 10px; font-size: 14px; transform: translateZ(50px); z-index: 4; border: 2px solid #000;
+        }
+        
+        #login-screen .input__container:nth-of-type(1)::before {
+            content: "EMAIL";
+            position: absolute; top: -15px; left: 20px; background: #e9b50b; color: #000; font-weight: bold; padding: 5px 10px; font-size: 14px; transform: translateZ(50px); z-index: 4; border: 2px solid #000;
+        }
+        #login-screen .input__container:nth-of-type(2)::before {
+            content: "PASSWORD";
+            position: absolute; top: -15px; left: 20px; background: #e9b50b; color: #000; font-weight: bold; padding: 5px 10px; font-size: 14px; transform: translateZ(50px); z-index: 4; border: 2px solid #000;
+        }
+        
+
+        /* --- Website Layout Code --- */
+        body, html {
+          margin: 0;
+          padding: 0;
+          min-height: 100%;
+          font-family: "Roboto", Arial, sans-serif;
+          background-color: #f0e7d5; 
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px 0; /* Add padding for long content */
+        }
+
+        .login-form {
+          background: #f0f0f0;
+          padding: 40px;
+          padding-top: 50px;
+          border: 4px solid #000;
+          box-shadow: 15px 15px 0 #000;
+          display: flex;
+          flex-direction: column;
+          gap: 25px; /* Adjusted gap */
+          /* Set a max-width to ensure it looks good */
+          max-width: 400px;
+          width: 90%;
+        }
+
+        .login-form h1 {
+            text-align: center;
+            margin: 0;
+            font-size: 2.5rem;
+            color: #000;
+            margin-bottom: 10px; /* Added margin */
+        }
+
+        .submit-button {
+          border: 3px solid #000;
+          background: #e9b50b;
+          color: #000;
+          padding: 15px;
+          font-size: 18px;
+          font-weight: bold;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 300ms cubic-bezier(0.23, 1, 0.32, 1);
+          box-shadow: 5px 5px 0 0 #000;
+          margin-top: 10px;
+        }
+
+        .submit-button:hover {
+          transform: translateX(-3px) translateY(-3px);
+          box-shadow: 8px 8px 0 0 #000;
+        }
+        
+        /* --- CSS for Message Area --- */
+        .message-area { /* Changed from ID to class */
+            text-align: center;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: -10px;
+            margin-bottom: -10px;
+            height: 20px; 
+            line-height: 20px;
+        }
+        
+        .error {
+            color: #D8000C; /* Red for errors */
+        }
+        
+        .success {
+            color: #270; /* Green for success */
+        }
+        
+        /* --- REMOVED Gemini Button Styles --- */
+        
+        /* --- Loader Overlay (kept for Firebase) --- */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+        }
+        
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 9px solid #f0f0f0;
+            border-bottom-color: #e9b50b; /* Changed to accent color */
+            animation: spin 1s linear infinite;
+            z-index: 9999;
+        }
+        
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* --- Welcome Screen Styles --- */
+        #welcome-screen {
+            display: none; /* Hidden by default */
+            align-items: center;
+            text-align: center;
+            gap: 20px; /* Space out the welcome elements */
+        }
+
+        /* Apply max-width to specific screens */
+        #signup-screen, #welcome-screen, #login-screen { /* Added login-screen */
+            max-width: 400px;
+        }
+
+
+        #welcome-screen h1 {
+            font-size: 2.2rem;
+            margin: 0;
+        }
+
+        #welcome-screen p {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        /* Use the same style as the submit button */
+        .welcome-button {
+          border: 3px solid #000;
+          background: #e9b50b;
+          color: #000;
+          padding: 15px;
+          font-size: 18px;
+          font-weight: bold;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 300ms cubic-bezier(0.23, 1, 0.32, 1);
+          box-shadow: 5px 5px 0 0 #000;
+          margin-top: 20px;
+          width: 100%;
+          max-width: 350px;
+        }
+
+        .welcome-button:hover {
+          transform: translateX(-3px) translateY(-3px);
+          box-shadow: 8px 8px 0 0 #000;
+        }
+
+        /* --- Game Store Styles --- */
+        #game-store-screen {
+            display: none; /* Hidden by default */
+            max-width: 800px; /* Wider for the store layout */
+            gap: 20px;
+        }
+
+        .featured-game-card {
+            background: #fff; /* White background for contrast */
+            border: 4px solid #000;
+            box-shadow: 10px 10px 0 #000;
+            padding: 20px;
+            text-align: left;
+            border-radius: 4px; /* Slight rounding */
+            width: 100%;
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .game-image-placeholder {
+            width: 100%;
+            height: 300px;
+            background: #333; /* Dark placeholder */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 3px solid #000;
+            margin-bottom: 15px;
+            border-radius: 2px;
+        }
+        
+        .featured-game-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
+        }
+        
+        .featured-game-card p {
+            margin: 0 0 20px 0;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        /* Make the buy button yellow to match accent */
+        .buy-now-button {
+            border: 3px solid #000;
+            background: #e9b50b;
+            color: #000;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 300ms cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 5px 5px 0 0 #000;
+            width: 100%;
+        }
+        .buy-now-button:hover {
+            transform: translateX(-3px) translateY(-3px);
+            box-shadow: 8px 8px 0 0 #000;
+        }
+
+        #game-store-screen h3 {
+            margin: 10px 0 -10px 0; /* Adjusted margin */
+            text-align: left;
+            font-size: 1.5rem;
+            align-self: flex-start;
+        }
+        
+        .game-list {
+            display: grid; /* Use grid for responsive layout */
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjusted minmax */
+            gap: 20px;
+            width: 100%;
+        }
+        
+        /* Placeholder for empty game list */
+        .game-list-placeholder {
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .game-card {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0 #000;
+            padding: 10px;
+            text-align: left;
+            border-radius: 2px;
+            display: flex; /* Use flex for layout */
+            flex-direction: column;
+            justify-content: space-between; /* Push price to bottom */
+            height: 100%; /* Make cards equal height */
+        }
+        
+        .game-card .game-image-placeholder.small {
+            height: 100px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .game-card h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+        
+        /* Game description style */
+        .game-card p {
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.4;
+            flex-grow: 1; /* Allow description to grow */
+            margin: 0 0 10px 0;
+        }
+        
+        .game-card span {
+            font-weight: bold;
+            color: #000;
+            font-size: 1.1rem;
+        }
+        
+        /* Log out button needs different color */
+        #logOutBtn {
+            background: #f0f0f0; /* Gray, less important */
+        }
+        #logOutBtn:hover {
+             background: #ddd;
+        }
+
+        /* --- REMOVED Recommendation Controls --- */
+
+        /* --- NEW: Form Toggle Link --- */
+        .toggle-form-link {
+            text-align: center;
+            color: #333;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .toggle-form-link:hover {
+            color: #000;
+        }
+
+        /* --- NEW: Hide Login Screen by default --- */
+        #login-screen {
+            display: none;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Loader Overlay -->
+    <div id="loader-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Sign Up Screen -->
+    <form class="login-form" id="signup-screen">
+        <h1>Create Your Account</h1>
+
+        <!-- Username Input -->
+        <div class="input__container">
+          <div class="shadow__input"></div>
+          <button class="input__button__shadow" type="button"> 
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000000" width="20px" height="20px"> <path d="M0 0h24v24H0z" fill="none"></path> <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path> </svg>
+          </button>
+          <input
+            type="text"
+            id="signup-username" 
+            name="username"
+            class="input__search"
+            placeholder="Enter username"
+            required
+          />
+        </div>
+        
+        <!-- NEW: Email Input -->
+        <div class="input__container">
+            <div class="shadow__input"></div>
+            <button class="input__button__shadow" type="button"> 
+                <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </button>
+            <input
+              type="email"
+              id="signup-email" 
+              name="email"
+              class="input__search"
+              placeholder="Enter email"
+              required
+            />
+        </div>
+
+        <!-- Password Input -->
+        <div class="input__container">
+            <div class="shadow__input"></div>
+            <button class="input__button__shadow" type="button"> 
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM16 8H8V6c0-2.21 1.79-4 4-4s4 1.79 4 4v2z"/></svg>
+            </button>
+            <input
+              type="password"
+              id="signup-password" 
+              name="password"
+              class="input__search"
+              placeholder="Enter password"
+              required
+            />
+          </div>
+          
+        <!-- Confirm Password Input -->
+        <div class="input__container">
+            <div class="shadow__input"></div>
+            <button class="input__button__shadow" type="button"> 
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM16 8H8V6c0-2.21 1.79-4 4-4s4 1.79 4 4v2z"/></svg>
+            </button>
+            <input
+              type="password"
+              id="signup-confirmPassword" 
+              name="confirmPassword"
+              class="input__search"
+              placeholder="Confirm password"
+              required
+            />
+          </div>
+          
+        <!-- REMOVED Gemini Button -->
+          
+        <!-- Message Area -->
+        <p class="message-area" id="signup-message-area"></p>
+
+        <!-- Submit Button -->
+        <button class="submit-button" type="submit">
+            Sign Up
+        </button>
+        
+        <!-- NEW: Toggle Link -->
+        <p class="toggle-form-link" id="show-login-link">Already have an account? Log In</p>
+
+    </form>
+    
+    <!-- --- NEW: Login Screen --- -->
+    <form class="login-form" id="login-screen">
+        <h1>Welcome Back</h1>
+
+        <!-- Email Input -->
+        <div class="input__container">
+            <div class="shadow__input"></div>
+            <button class="input__button__shadow" type="button"> 
+                <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </button>
+            <input
+              type="email"
+              id="login-email" 
+              name="email"
+              class="input__search"
+              placeholder="Enter email"
+              required
+            />
+        </div>
+
+        <!-- Password Input -->
+        <div class="input__container">
+            <div class="shadow__input"></div>
+            <button class="input__button__shadow" type="button"> 
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM16 8H8V6c0-2.21 1.79-4 4-4s4 1.79 4 4v2z"/></svg>
+            </button>
+            <input
+              type="password"
+              id="login-password" 
+              name="password"
+              class="input__search"
+              placeholder="Enter password"
+              required
+            />
+        </div>
+          
+        <!-- Message Area -->
+        <p class="message-area" id="login-message-area"></p>
+
+        <!-- Submit Button -->
+        <button class="submit-button" type="submit">
+            Log In
+        </button>
+        
+        <!-- NEW: Toggle Link -->
+        <p class="toggle-form-link" id="show-signup-link">Don't have an account? Sign Up</p>
+    </form>
+
+    <!-- --- Follow-up Screen --- -->
+    <div class="login-form" id="welcome-screen">
+        <h1>🎉 Welcome! 🎉</h1>
+        <p>You're logged in, <br><strong id="welcome-username"></strong>!</p>
+        
+        <button class="welcome-button" type="button" id="browseStoreBtn">
+            Browse Game Store
+        </button>
+    </div>
+
+    <!-- --- Game Store Screen --- -->
+    <div class="login-form" id="game-store-screen">
+        <h1>Game Store</h1>
+        
+        <!-- Featured Game -->
+        <div class="featured-game-card">
+            <div class="game-image-placeholder">
+                <span>Featured Game</span>
+            </div>
+            <h2>Cyber-Funk 2088</h2>
+            <p>An open-world, action-adventure story set in a neon-drenched metropolis. Become a cyber-enhanced mercenary in a city obsessed with power, glamour, and body modification.</p>
+            <button class="buy-now-button" type="button">Buy Now - $59.99</button>
+        </div>
+
+        <!-- REMOVED Recommendation Engine -->
+        <h3>On Sale</h3>
+        
+        <!-- Updated Game List (Static) -->
+        <div class="game-list" id="game-list">
+            <div class="game-card">
+                <div>
+                    <div class="game-image-placeholder small"></div>
+                    <h4>Pixel Runner</h4>
+                    <p>A fast-paced endless runner through a retro city.</p>
+                </div>
+                <span>$9.99</span>
+            </div>
+            <div class="game-card">
+                <div>
+                    <div class="game-image-placeholder small"></div>
+                    <h4>Void Scrapper</h4>
+                    <p>Mine asteroids and fight pirates in this top-down shooter.</p>
+                </div>
+                <span>$4.99</span>
+            </div>
+            <div class="game-card">
+                <div>
+                    <div class="game-image-placeholder small"></div>
+                    <h4>Block Fortress</h4>
+                    <p>Defend your castle from waves of blocky invaders.</p>
+                </div>
+                <span>$14.99</span>
+            </div>
+        </div>
+
+        <button class="welcome-button" type="button" id="logOutBtn">
+            Log Out
+        </button>
+    </div>
+
+
+    <!-- --- JAVASCRIPT SECTION --- -->
+    <script type="module">
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // Wait for firebase to be ready
+            const firebaseCheck = setInterval(() => {
+                if (window.firebaseServices) {
+                    clearInterval(firebaseCheck);
+                    initializeAppLogic();
+                }
+            }, 100);
+
+            function initializeAppLogic() {
+                // Firebase services
+                const { auth, db, appId, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc } = window.firebaseServices;
+
+                // Screen Elements
+                const signupScreen = document.getElementById("signup-screen");
+                const loginScreen = document.getElementById("login-screen");
+                const welcomeScreen = document.getElementById("welcome-screen");
+                const gameStoreScreen = document.getElementById("game-store-screen");
+                
+                // Welcome Screen Elements
+                const welcomeUsername = document.getElementById("welcome-username");
+                const browseStoreBtn = document.getElementById("browseStoreBtn");
+                
+                // Sign Up Form Elements
+                const signupUsernameInput = document.getElementById("signup-username");
+                const signupEmailInput = document.getElementById("signup-email");
+                const signupPasswordInput = document.getElementById("signup-password");
+                const signupConfirmPasswordInput = document.getElementById("signup-confirmPassword");
+                const signupMessageArea = document.getElementById("signup-message-area");
+                
+                // Login Form Elements
+                const loginEmailInput = document.getElementById("login-email");
+                const loginPasswordInput = document.getElementById("login-password");
+                const loginMessageArea = document.getElementById("login-message-area");
+                
+                // Toggle Links
+                const showLoginLink = document.getElementById("show-login-link");
+                const showSignupLink = document.getElementById("show-signup-link");
+                
+                // Other Elements
+                const logOutBtn = document.getElementById("logOutBtn");
+                const loaderOverlay = document.getElementById("loader-overlay");
+                
+                // --- Loader Functions ---
+                const showLoader = (buttonToDisable) => {
+                    loaderOverlay.style.display = "flex";
+                    if (buttonToDisable) buttonToDisable.disabled = true;
+                };
+                
+                const hideLoader = (buttonToEnable) => {
+                    loaderOverlay.style.display = "none";
+                    if (buttonToEnable) buttonToEnable.disabled = false;
+                };
+
+                // --- REMOVED Gemini API Call Functions ---
+
+                // --- NEW: Sign Up Event Listener ---
+                signupScreen.addEventListener("submit", async (event) => {
+                    event.preventDefault();
+                    const username = signupUsernameInput.value;
+                    const email = signupEmailInput.value;
+                    const password = signupPasswordInput.value;
+                    const confirmPassword = signupConfirmPasswordInput.value;
+                    
+                    if (username === "" || email === "" || password === "" || confirmPassword === "") {
+                        signupMessageArea.textContent = "Please fill in all fields.";
+                        signupMessageArea.className = "message-area error";
+                        return;
+                    }
+                    if (password !== confirmPassword) {
+                        signupMessageArea.textContent = "Passwords do not match.";
+                        signupMessageArea.className = "message-area error";
+                        return;
+                    }
+
+                    const submitButton = signupScreen.querySelector('.submit-button');
+                    showLoader(submitButton);
+                    signupMessageArea.textContent = "Creating account...";
+                    signupMessageArea.className = "message-area success";
+
+                    try {
+                        // 1. Create user in Auth
+                        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                        const user = userCredential.user;
+
+                        // 2. Store additional user info in Firestore
+                        // Use the path: /artifacts/{appId}/users/{userId}/profile/data
+                        const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                        await setDoc(userDocRef, {
+                            username: username,
+                            email: email,
+                            createdAt: new Date()
+                        });
+                        
+                        // 3. Show Welcome Screen
+                        hideLoader(submitButton);
+                        signupScreen.style.display = "none";
+                        welcomeScreen.style.display = "flex";
+                        welcomeUsername.textContent = username;
+                        signupMessageArea.textContent = "";
+                        
+                    } catch (error) {
+                        hideLoader(submitButton);
+                        signupMessageArea.textContent = error.message;
+                        signupMessageArea.className = "message-area error";
+                        console.error("Error signing up:", error);
+                    }
+                });
+                
+                // --- NEW: Login Event Listener ---
+                loginScreen.addEventListener("submit", async (event) => {
+                    event.preventDefault();
+                    const email = loginEmailInput.value;
+                    const password = loginPasswordInput.value;
+
+                    if (email === "" || password === "") {
+                        loginMessageArea.textContent = "Please fill in all fields.";
+                        loginMessageArea.className = "message-area error";
+                        return;
+                    }
+
+                    const submitButton = loginScreen.querySelector('.submit-button');
+                    showLoader(submitButton);
+                    loginMessageArea.textContent = "Logging in...";
+                    loginMessageArea.className = "message-area success";
+
+                    try {
+                        // 1. Sign in user
+                        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                        const user = userCredential.user;
+
+                        // 2. Fetch profile from Firestore
+                        const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                        const docSnap = await getDoc(userDocRef);
+
+                        let username = email; // Fallback
+                        if (docSnap.exists()) {
+                            username = docSnap.data().username || email;
+                        }
+
+                        // 3. Show Welcome Screen
+                        hideLoader(submitButton);
+                        loginScreen.style.display = "none";
+                        welcomeScreen.style.display = "flex";
+                        welcomeUsername.textContent = username;
+                        loginMessageArea.textContent = "";
+
+                    } catch (error) {
+                        hideLoader(submitButton);
+                        loginMessageArea.textContent = error.message;
+                        loginMessageArea.className = "message-area error";
+                        console.error("Error logging in:", error);
+                    }
+                });
+
+                // --- REMOVED Game Recommendation Functions ---
+                
+                // --- Event Listener for Browsing Store ---
+                browseStoreBtn.addEventListener("click", () => {
+                    welcomeScreen.style.display = "none";
+                    gameStoreScreen.style.display = "flex";
+                });
+                
+                // --- Updated: Event Listener for Log Out Button ---
+                logOutBtn.addEventListener("click", async () => {
+                    try {
+                        await signOut(auth);
+                        // Show the login screen after logout
+                        gameStoreScreen.style.display = "none";
+                        loginScreen.style.display = "flex"; // Show login, not signup
+                        
+                        // Clear all form fields
+                        signupUsernameInput.value = "";
+                        signupEmailInput.value = "";
+                        signupPasswordInput.value = "";
+                        signupConfirmPasswordInput.value = "";
+                        loginEmailInput.value = "";
+                        loginPasswordInput.value = "";
+                        
+                    } catch (error) {
+                        console.error("Error logging out:", error);
+                    }
+                });
+                
+                // --- NEW: Toggle Listeners ---
+                showLoginLink.addEventListener("click", () => {
+                    signupScreen.style.display = "none";
+                    loginScreen.style.display = "flex";
+                    signupMessageArea.textContent = "";
+                });
+                
+                showSignupLink.addEventListener("click", () => {
+                    loginScreen.style.display = "none";
+                    signupScreen.style.display = "flex";
+                    loginMessageArea.textContent = "";
+                });
+
+                // Check auth state on load
+                // This is now handled by the onAuthStateChanged in the setup script
+                // We just need to decide which screen to show
+                if (auth.currentUser && !auth.currentUser.isAnonymous) {
+                     // If user is already logged in (e.g. page refresh), fetch their data and go to welcome
+                    (async () => {
+                        const user = auth.currentUser;
+                        const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                        const docSnap = await getDoc(userDocRef);
+                        let username = user.email;
+                        if (docSnap.exists()) {
+                            username = docSnap.data().username || user.email;
+                        }
+                        signupScreen.style.display = "none";
+                        loginScreen.style.display = "none";
+                        welcomeScreen.style.display = "flex";
+                        welcomeUsername.textContent = username;
+                    })();
+                } else {
+                    // Show login screen by default
+                    signupScreen.style.display = "none";
+                    loginScreen.style.display = "flex";
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
