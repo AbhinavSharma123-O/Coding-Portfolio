@@ -1,0 +1,16 @@
+public class RightTriangle {
+    public static void main(String[] args) {
+        double x = Double.parseDouble(args[0]);
+        double y = Double.parseDouble(args[1]);
+        double z = Double.parseDouble(args[2]);
+
+        
+        double a = Math.min(x, Math.min(y, z));
+        double c = Math.max(x, Math.max(y, z));
+        double b = x + y + z - a - c;
+
+        double eps = 1e-9;
+        boolean isRight = Math.abs(a*a + b*b - c*c) <= eps;
+        System.out.println(isRight);
+    }
+}

@@ -1,0 +1,33 @@
+// Kary.java
+public class Kary {
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            System.err.println("Usage: java Kary <integer> <base(2-16)>");
+            return;
+        }
+        long value = Long.parseLong(args[0]);
+        int base = Integer.parseInt(args[1]);
+        if (base < 2 || base > 16) {
+            System.err.println("Base must be between 2 and 16.");
+            return;
+        }
+
+        if (value == 0) {
+            System.out.println("0");
+            return;
+        }
+
+        boolean negative = value < 0;
+        long n = negative ? -value : value;
+        StringBuilder sb = new StringBuilder();
+
+        while (n > 0) {
+            int digit = (int)(n % base);
+            char c = (digit < 10) ? (char)('0' + digit) : (char)('A' + (digit - 10));
+            sb.append(c);
+            n /= base;
+        }
+        if (negative) sb.append('-');
+        System.out.println(sb.reverse().toString());
+    }
+}

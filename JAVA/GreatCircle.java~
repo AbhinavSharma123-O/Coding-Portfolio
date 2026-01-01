@@ -1,0 +1,25 @@
+public class GreatCircle {
+    public static void main(String[] args) {
+        double lat1 = Double.parseDouble(args[0]);
+        double lon1 = Double.parseDouble(args[1]);
+        double lat2 = Double.parseDouble(args[2]);
+        double lon2 = Double.parseDouble(args[3]);
+
+        double R = 6371.0; 
+
+     
+        double phi1 = Math.toRadians(lat1);
+        double phi2 = Math.toRadians(lat2);
+        double dphi = Math.toRadians(lat2 - lat1);
+        double dlambda = Math.toRadians(lon2 - lon1);
+
+        double sinHalfDphi = Math.sin(dphi / 2.0);
+        double sinHalfDlambda = Math.sin(dlambda / 2.0);
+        double h = sinHalfDphi * sinHalfDphi +
+                   Math.cos(phi1) * Math.cos(phi2) * sinHalfDlambda * sinHalfDlambda;
+        double centralAngle = 2.0 * Math.asin(Math.sqrt(h));
+        double distance = R * centralAngle;
+
+        System.out.println(distance);
+    }
+}
