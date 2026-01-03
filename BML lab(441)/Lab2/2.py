@@ -1,0 +1,10 @@
+#use of attribuit of an array Ndim,shape,size,methods(sum(),mean(),sort(),sin())
+import numpy as np
+arr1=np.array([[5,3,2],[4,1,6]])
+print(np.ndim(arr1))
+print(np.shape(arr1))
+print(np.size(arr1))
+print(np.sum(arr1))
+print(np.mean(arr1))
+print(np.sort(arr1))
+print(np.sin(arr1))

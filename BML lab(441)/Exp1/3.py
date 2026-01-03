@@ -1,0 +1,12 @@
+import numpy as np
+A = np.array([[4, 2],[1, 3]])
+print(f"Matrix A:{A}")
+det_A = np.linalg.det(A)
+print(f"Determinant of A = {det_A}")
+eigenvalues, eigenvectors = np.linalg.eig(A)
+print(f"Eigenvalues of A = {eigenvalues}")
+print(f"Eigenvectors of A:{eigenvectors}")
+inv_A = np.linalg.inv(A)
+print(f"Inverse of A:{inv_A}")
+trace_A = np.trace(A)
+print(f"Trace of A = {trace_A}")
