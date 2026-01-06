@@ -1,0 +1,7 @@
+C:\Users\abhis\Desktop\C#\Conversion(STR to INT)\Conversion(STR to INT)\obj\Debug\Conversion(STR to INT).csproj.AssemblyReference.cache
+C:\Users\abhis\Desktop\C#\Conversion(STR to INT)\Conversion(STR to INT)\obj\Debug\Conversion(STR to INT).csproj.CoreCompileInputs.cache
+C:\Users\abhis\Desktop\C#\Conversion(STR to INT)\Conversion(STR to INT)\bin\Debug\Conversion(STR to INT).exe.config
+C:\Users\abhis\Desktop\C#\Conversion(STR to INT)\Conversion(STR to INT)\bin\Debug\Conversion(STR to INT).exe
+C:\Users\abhis\Desktop\C#\Conversion(STR to INT)\Conversion(STR to INT)\bin\Debug\Conversion(STR to INT).pdb
+C:\Users\abhis\Desktop\C#\Conversion(STR to INT)\Conversion(STR to INT)\obj\Debug\Conversion(STR to INT).exe
+C:\Users\abhis\Desktop\C#\Conversion(STR to INT)\Conversion(STR to INT)\obj\Debug\Conversion(STR to INT).pdb
