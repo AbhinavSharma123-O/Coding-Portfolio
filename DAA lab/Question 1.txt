@@ -1,0 +1,3 @@
+1)Implement a Linear search algorithm to check whether a Student ID is present in the unsorted list
+2)Implement a binary search algorithm to check whether a student ID exist in the sorted official roll list
+3)
