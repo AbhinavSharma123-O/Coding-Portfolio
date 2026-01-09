@@ -1,0 +1,7 @@
+C:\Users\abhis\Desktop\C#\First Project\First Project\bin\Debug\First Project.exe.config
+C:\Users\abhis\Desktop\C#\First Project\First Project\bin\Debug\First Project.exe
+C:\Users\abhis\Desktop\C#\First Project\First Project\bin\Debug\First Project.pdb
+C:\Users\abhis\Desktop\C#\First Project\First Project\obj\Debug\First Project.csproj.AssemblyReference.cache
+C:\Users\abhis\Desktop\C#\First Project\First Project\obj\Debug\First Project.csproj.CoreCompileInputs.cache
+C:\Users\abhis\Desktop\C#\First Project\First Project\obj\Debug\First Project.exe
+C:\Users\abhis\Desktop\C#\First Project\First Project\obj\Debug\First Project.pdb
