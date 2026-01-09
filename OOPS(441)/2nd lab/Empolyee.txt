@@ -1,0 +1,12 @@
+import java.util.Scanner;
+class Empolyee{
+    public static void main(String[]args){
+	int i=1;
+	for(i;i<=5;i++){
+		s=""
+		Scanner sc=new Scanner(System.in);
+       		System.out.print("ENter Name");
+        	s=sc.next();
+		System.out.println(i+" Employee name is "+s)
+		
+}	}}

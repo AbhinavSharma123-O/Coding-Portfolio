@@ -1,0 +1,10 @@
+public class Swap{
+    public static void main(String args[]){
+	int a=6,b=4,temp;
+	temp=a;
+	a=b;
+	b=temp
+        
+    }
+    
+}

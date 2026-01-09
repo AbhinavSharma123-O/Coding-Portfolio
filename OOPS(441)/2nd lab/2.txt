@@ -1,0 +1,5 @@
+WAP display employee details (5) scanner
+sumof all digits are Prime,Armstrong,perfect
+input number to hexadecimal
+recursive and non recursive Fibonacci
+pattern
