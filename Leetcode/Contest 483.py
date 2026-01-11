@@ -6,5 +6,6 @@ while i>=0:
         break
     else:
         i=i-1
+return ""
 
     
