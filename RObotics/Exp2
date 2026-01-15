@@ -1,0 +1,83 @@
+void setup()
+{
+  DDRD = 0b11111111;
+}
+void loop()
+{
+  //PATTERN1
+  PORTD = 0b11111111;
+  delay(300);
+  PORTD = 0b00000000;
+  delay(300);
+  
+  //PATTERN2
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<8; i++){
+    PORTD = 0b00000001 << i;
+    delay(300);
+  }
+  
+  //PATTERN3
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<8; i++){
+    PORTD = 0b10000000 >> i;
+    delay(300);
+  }
+  
+  //PATTERN4
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<8; i++){
+    PORTD = PORTD | 0b00000001 << i;
+    delay(300);
+  }
+  
+  //PATTERN5
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<8; i++){
+    PORTD = PORTD | 0b10000000 >> i;
+    delay(300);
+  }
+  
+  //PATTERN6
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<4; i++){
+    PORTD = 0b00001000 >> i | 0b00010000 << i;
+    delay(300);
+  }
+  
+  //PATTERN7
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<4; i++){
+    PORTD = 0b10000000 >> i | 0b00000001 << i;
+    delay(300);
+  }
+  
+  //PATTERN8
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<4; i++){
+    PORTD = PORTD | 0b10000000 >> i | 0b00000001 << i;
+    delay(300);
+  }
+  
+  //PATTERN9
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<4; i++){
+    PORTD = PORTD | 0b00001000 >> i | 0b00010000 << i;
+    delay(300);
+  }
+  //PATTERN10
+  PORTD = 0b00000000;
+  delay(300);
+  for(int i=0; i<8; i++){
+    PORTD = 0b10000000 >> i | 0b00000001 << i;
+    delay(300);
+  }
+}
