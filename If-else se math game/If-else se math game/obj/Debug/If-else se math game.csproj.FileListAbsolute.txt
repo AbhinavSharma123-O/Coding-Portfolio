@@ -1,0 +1,8 @@
+C:\Users\abhis\Desktop\C#\If-else se math game\If-else se math game\bin\Debug\If-else se math game.exe.config
+C:\Users\abhis\Desktop\C#\If-else se math game\If-else se math game\bin\Debug\If-else se math game.exe
+C:\Users\abhis\Desktop\C#\If-else se math game\If-else se math game\bin\Debug\If-else se math game.pdb
+C:\Users\abhis\Desktop\C#\If-else se math game\If-else se math game\obj\Debug\If-else se math game.csproj.AssemblyReference.cache
+C:\Users\abhis\Desktop\C#\If-else se math game\If-else se math game\obj\Debug\If-else se math game.csproj.CoreCompileInputs.cache
+C:\Users\abhis\Desktop\C#\If-else se math game\If-else se math game\obj\Debug\If-else se math game.exe
+C:\Users\abhis\Desktop\C#\If-else se math game\If-else se math game\obj\Debug\If-else se math game.pdb
+C:\Users\abhis\Desktop\C#\If-else se math game\If-else se math game\obj\Debug\If-else se math game.exe.config
