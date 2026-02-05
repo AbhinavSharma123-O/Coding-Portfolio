@@ -1,0 +1,18 @@
+import java.util.Scanner;
+
+public class Solution { // Codeforces usually accepts 'Main' or any class name, but keep it consistent.
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        // --- YOUR CODE STARTS HERE ---
+        
+        // Example: Reading an integer
+        if (sc.hasNextInt()) {
+            int n = sc.nextInt();
+        }
+        
+        // --- YOUR CODE ENDS HERE ---
+        
+        sc.close();
+    }
+}
